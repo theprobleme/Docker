@@ -2,5 +2,8 @@ version: "1.0"
 services:
   apache2:
       build: Apache2
+      volumes:
+        - ./www:/app/public
+        - ./logs:/var/log
       ports:
         - "8000:80"
