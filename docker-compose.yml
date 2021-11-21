@@ -1,9 +1,45 @@
-version: "1.0"
+version: "2.2"
+
 services:
+# Configuration for the Apache2 server
   apache2:
-      build: Apache2
-      volumes:
-        - ./www:/app/public
-        - ./logs:/var/log
+    container_name: apache2
+    build: Apache2
+    ports:
+      - "8000:80"
+    volumes:
+      - ./Apache2/appdatas/:/var/www/localhost/htdocs/
+    depends_on:
+      - mariadb
+
+# Configuration for the MariaDB server
+  mariadb:
+    container_name: mariadb
+    build: BDD
+    ports:
+      - 3306:3308
+    volumes: 
+      - ./bdddatas/:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+
+# Configuration for phpmyadmin web app
+  phpmyadmin:
+      image: phpmyadmin
+      container_name: phpmyadmin
+      links: 
+      - mariadb
+      environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mariadb
+      - PMA_PORT=3306
+
+      restart: always
       ports:
-        - "8000:80"
+      - 8080:80
+
+volumes:
+  dbdata:

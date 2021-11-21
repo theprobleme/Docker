@@ -14,15 +14,18 @@ RUN apk – update \
     && apk add nano \
     && apk add bash \
     && apk add rsync \
+    && apk add mlocate \
     && rm -rf /var/cache/apk/*
+
+# Remove default index.html file
+RUN rm -f /var/www/localhost/htdocs/index.html
 
 # Port fowarding
 EXPOSE 8000:80
 
-# Maintain the container after leaving the shell
-CMD [ "-D" , "FOREGROUND" ]
+# Volume for apache2 datas
+VOLUME [ "/appdatas" ]
 
-# Run "httpd" at the start of the container
-ENTRYPOINT [ "/usr/sbin/httpd" ]
-
+# Maintain the container after leaving the shell and execute httpd command
+CMD [ "httpd" , "-D" , "FOREGROUND" ]
 
