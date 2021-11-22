@@ -1,77 +1,101 @@
 #!/bin/sh
 
-# Comes from : https://contains.dev/yobasystems/alpine-mariadb/latest
+# TAKEN FROM : https://github.com/yobasystems/alpine-mariadb/blob/master/alpine-mariadb-amd64/files/run.sh?fbclid=IwAR0K8eEgSV5RCQOax_TnYzRotc2eKyfpsHwh45FHkj9Z-bNHY_FbD72e1Jk
 
-# parameters
-MYSQL_ROOT_PWD=${MYSQL_ROOT_PWD:-"mysql"}
-MYSQL_USER=${MYSQL_USER:-"test"}
-MYSQL_USER_PWD=${MYSQL_USER_PWD:-"test"}
-MYSQL_USER_DB=${MYSQL_USER_DB:-"test"}
+# execute any pre-init scripts
+for i in /scripts/pre-init.d/*sh
+do
+	if [ -e "${i}" ]; then
+		echo "[i] pre-init.d - processing $i"
+		. "${i}"
+	fi
+done
 
-if [ ! -d "/run/mysqld" ]; then
+if [ -d "/run/mysqld" ]; then
+	echo "[i] mysqld already present, skipping creation"
+	chown -R mysql:mysql /run/mysqld
+else
+	echo "[i] mysqld not found, creating...."
 	mkdir -p /run/mysqld
 	chown -R mysql:mysql /run/mysqld
 fi
 
 if [ -d /var/lib/mysql/mysql ]; then
-	echo '[i] MySQL directory already present, skipping creation'
+	echo "[i] MySQL directory already present, skipping creation"
+	chown -R mysql:mysql /var/lib/mysql
 else
 	echo "[i] MySQL data directory not found, creating initial DBs"
 
 	chown -R mysql:mysql /var/lib/mysql
 
-	# init database
-	echo 'Initializing database'
 	mysql_install_db --user=mysql --ldata=/var/lib/mysql > /dev/null
-	echo 'Database initialized'
 
-	echo "[i] MySql root password: $MYSQL_ROOT_PWD"
+	if [ "$MYSQL_ROOT_PASSWORD" = "" ]; then
+		MYSQL_ROOT_PASSWORD=`pwgen 16 1`
+		echo "[i] MySQL root Password: $MYSQL_ROOT_PASSWORD"
+	fi
 
-	# create temp file
+	MYSQL_DATABASE=${MYSQL_DATABASE:-""}
+	MYSQL_USER=${MYSQL_USER:-""}
+	MYSQL_PASSWORD=${MYSQL_PASSWORD:-""}
+
 	tfile=`mktemp`
 	if [ ! -f "$tfile" ]; then
 	    return 1
 	fi
 
-	# save sql
-	echo "[i] Create temp file: $tfile"
 	cat << EOF > $tfile
 USE mysql;
-FLUSH PRIVILEGES;
-DELETE FROM mysql.user;
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PWD' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PWD' WITH GRANT OPTION;
+FLUSH PRIVILEGES ;
+GRANT ALL ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION ;
+GRANT ALL ON *.* TO 'root'@'localhost' identified by '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION ;
+SET PASSWORD FOR 'root'@'localhost'=PASSWORD('${MYSQL_ROOT_PASSWORD}') ;
+DROP DATABASE IF EXISTS test ;
+FLUSH PRIVILEGES ;
 EOF
 
-
-	# Create new database
-	if [ "$MYSQL_USER_DB" != "" ]; then
-		echo "[i] Creating database: $MYSQL_USER_DB"
-		echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_USER_DB\` CHARACTER SET utf8 COLLATE utf8_general_ci;" >> $tfile
-
-		# set new User and Password
-		if [ "$MYSQL_USER" != "" ] && [ "$MYSQL_USER_PWD" != "" ]; then
-		echo "[i] Creating user: $MYSQL_USER with password $MYSQL_USER_PWD"
-		echo "GRANT ALL ON \`$MYSQL_USER_DB\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_USER_PWD';" >> $tfile
+	if [ "$MYSQL_DATABASE" != "" ]; then
+	    echo "[i] Creating database: $MYSQL_DATABASE"
+		if [ "$MYSQL_CHARSET" != "" ] && [ "$MYSQL_COLLATION" != "" ]; then
+			echo "[i] with character set [$MYSQL_CHARSET] and collation [$MYSQL_COLLATION]"
+			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET $MYSQL_CHARSET COLLATE $MYSQL_COLLATION;" >> $tfile
+		else
+			echo "[i] with character set: 'utf8' and collation: 'utf8_general_ci'"
+			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET utf8 COLLATE utf8_general_ci;" >> $tfile
 		fi
-	else
-		# don`t need to create new database,Set new User to control all database.
-		if [ "$MYSQL_USER" != "" ] && [ "$MYSQL_USER_PWD" != "" ]; then
-		echo "[i] Creating user: $MYSQL_USER with password $MYSQL_USER_PWD"
-		echo "GRANT ALL ON *.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_USER_PWD';" >> $tfile
-		fi
+
+	 if [ "$MYSQL_USER" != "" ]; then
+		echo "[i] Creating user: $MYSQL_USER with password $MYSQL_PASSWORD"
+		echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >> $tfile
+	    fi
 	fi
 
-	echo 'FLUSH PRIVILEGES;' >> $tfile
-
-	# run sql in tempfile
-	echo "[i] run tempfile: $tfile"
-	/usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-networking=0 < $tfile
+	/usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < $tfile
 	rm -f $tfile
+
+	for f in /docker-entrypoint-initdb.d/*; do
+		case "$f" in
+			*.sql)    echo "$0: running $f"; /usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$f"; echo ;;
+			*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | /usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$f"; echo ;;
+			*)        echo "$0: ignoring or entrypoint initdb empty $f" ;;
+		esac
+		echo
+	done
+
+	echo
+	echo 'MySQL init process done. Ready for start up.'
+	echo
+
+	echo "exec /usr/bin/mysqld --user=mysql --console --skip-name-resolve --skip-networking=0" "$@"
 fi
 
-echo "[i] Sleeping 5 sec"
-sleep 5
+# execute any pre-exec scripts
+for i in /scripts/pre-exec.d/*sh
+do
+	if [ -e "${i}" ]; then
+		echo "[i] pre-exec.d - processing $i"
+		. ${i}
+	fi
+done
 
-echo '[i] start running mysqld'
-exec /usr/bin/mysqld --user=mysql --console --skip-networking=0
+exec /usr/bin/mysqld --user=mysql --console --skip-name-resolve --skip-networking=0 $@

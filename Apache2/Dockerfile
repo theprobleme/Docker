@@ -1,5 +1,5 @@
 # Origin image
-FROM alpine
+FROM alpine:3.14.2
 
 # File description
 LABEL version="1.0"

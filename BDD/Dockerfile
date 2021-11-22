@@ -12,6 +12,7 @@ RUN apk – update \
 
 ADD ./bdddatas/startbdd.sh /scripts/startbdd.sh
 RUN chmod +x /scripts/startbdd.sh
+RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/my.cnf
 
 # Port fowarding
 EXPOSE 3306:3306
