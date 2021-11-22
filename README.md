@@ -68,7 +68,7 @@ Pour le conteneur phpmyadmin :
   - ID : `root`.
   - MDP : `hello`.
 
-## Axe d'amélioration
+## Axes d'amélioration
 1. Utilisation d'un script de lancement de la base de donnée fait soit-même.
 2. Meilleure structure du fichier Docker-compose.yml.
 3. Utilisation d'une image faite soit-même pour phpmyadmin.
