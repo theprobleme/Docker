@@ -3,15 +3,22 @@ FROM alpine
 LABEL version="1.0"
 LABEL description="MariaDB Server"
 
-RUN apk add --no-cache mariadb mariadb-client mariadb-server-utils pwgen && \
+RUN apk – update \
+  && apk add mariadb \
+  && apk add mariadb-client \
+  && apk add mariadb-server-utils \
+  && apk add pwgen \
   rm -f /var/cache/apk/*
 
+ADD ./bdddatas/startbdd.sh /scripts/startbdd.sh
+RUN chmod +x /scripts/startbdd.sh
+
 # Port fowarding
-EXPOSE 3306
+EXPOSE 3306:3306
 
 # Volume for Mysql datas
 VOLUME [ "/var/lib/mysql" ]
 
 # Maintain the container after leaving the shell and execute mysqld command
-CMD [ "mysqld" , "-D" , "FOREGROUND" ]
+ENTRYPOINT [ "/scripts/startbdd.sh" ]
 

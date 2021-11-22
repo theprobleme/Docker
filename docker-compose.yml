@@ -16,30 +16,22 @@ services:
   mariadb:
     container_name: mariadb
     build: BDD
+    restart: always
     ports:
-      - 3306:3308
+      - 3306:3306
     volumes: 
-      - ./bdddatas/:/var/lib/mysql
+      - ./BDD/bdddatas/:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "${MYSQL_DATABASE}"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: notSecureChangeMe
 
 # Configuration for phpmyadmin web app
   phpmyadmin:
-      image: phpmyadmin
+      image: phpmyadmin/phpmyadmin:latest
       container_name: phpmyadmin
-      links: 
+      depends_on: 
       - mariadb
       environment:
       - PMA_ARBITRARY=1
-      - PMA_HOST=mariadb
-      - PMA_PORT=3306
-
       restart: always
       ports:
       - 8080:80
-
-volumes:
-  dbdata:
