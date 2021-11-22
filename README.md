@@ -1,4 +1,5 @@
 # Cours de Docker ESEO
+
 $~~~~~~~~~~~$
 ## Démarrage
 
@@ -45,11 +46,11 @@ En pratique 3 conteneurs on été réalisés :
 
 
 $~~~~~~~~~~~$
-
 ## Validation
 Pour le conteneur apache2 :
 - Le serveur web tourne, il est possible de s'y connecter.
 - Php est fonctionnel, il permet l'affichage d'un fichier `php.info`.
+- Le serveur est connecté à la base de données, on peut faire une requêtes avec `SQLRequest.php`
 
 Pour le conteneur mariadb :
 - Le serveur de base de donnée est fonctionnel, il est possible de le ping avec son port.

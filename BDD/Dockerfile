@@ -15,6 +15,7 @@ RUN apk – update \
 
 # Add the startbdd.sh script to the container
 ADD ./bdddatas/startbdd.sh /scripts/startbdd.sh
+
 # Make the script runnable
 RUN chmod +x /scripts/startbdd.sh
 

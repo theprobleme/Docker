@@ -11,6 +11,8 @@ services:
       - ./Apache2/appdatas/:/var/www/localhost/htdocs/
     depends_on:
       - mariadb
+    networks:
+      - networkName
 
 # Configuration for the MariaDB server
   mariadb:
@@ -23,6 +25,8 @@ services:
       - ./BDD/bdddatas/:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: hello
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
     networks:
       - networkName
 

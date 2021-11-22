@@ -1,0 +1,10 @@
+**/BDD/bdddatas/mysql/
+**/BDD/bdddatas/performance_schema/
+**/BDD/bdddatas/aria_log_control
+**/BDD/bdddatas/aria_log.00000001
+**/BDD/bdddatas/ib_buffer_pool
+**/BDD/bdddatas/ib_logfile0
+**/BDD/bdddatas/ibdata1
+**/BDD/bdddatas/ibtmp1
+**/BDD/bdddatas/multi-master.info
+**/BDD/bdddatas/534735b5d2c0.pid

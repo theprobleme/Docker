@@ -6,15 +6,19 @@ LABEL version="1.0"
 LABEL description="Apache2 Server"
 
 # Install depedencies
-RUN apk – update \
-    && apk add curl \
-    && apk add php7-apache2 \
+RUN apk - update \
     && apk add apache2 \
-    && apk add mysql \
-    && apk add nano \
-    && apk add bash \
-    && apk add rsync \
-    && apk add mlocate \
+    && apk add php7 \
+    && apk add php7-apache2 \
+    && apk add php7-openssl \
+    && apk add php7-xml \
+    && apk add php7-pdo \
+    && apk add php7-mcrypt \
+    && apk add php7-session \
+    && apk add php7-mysqli \
+    && apk add php7-zlib \
+    && apk add su-exec \ 
+    && apk add php7-pdo_mysql \
     && rm -rf /var/cache/apk/*
 
 # Remove default index.html file
