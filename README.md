@@ -6,7 +6,7 @@
 Pour démarrager l'application, ouvrez une invite de commande à l'endroit où vous avez placé l'archive et exécutez la commande :
 
 ```
-tar -xvf PROJET.tar
+tar -xf PROJET.tar
 ```
 Ensuite exécutez, les commandes suivantes :
 ```
