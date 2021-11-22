@@ -22,16 +22,27 @@ services:
     volumes: 
       - ./BDD/bdddatas/:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: notSecureChangeMe
+      MYSQL_ROOT_PASSWORD: hello
+    networks:
+      - networkName
 
 # Configuration for phpmyadmin web app
   phpmyadmin:
-      image: phpmyadmin/phpmyadmin:latest
+      image: phpmyadmin:5.1-apache
       container_name: phpmyadmin
       depends_on: 
       - mariadb
       environment:
       - PMA_ARBITRARY=1
+      - PMA_HOST=mariadb
       restart: always
       ports:
       - 8080:80
+      links: 
+      - "mariadb"
+      networks:
+      - networkName
+
+networks:
+  networkName:
+    name: networkName
