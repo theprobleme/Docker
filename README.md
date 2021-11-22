@@ -1,6 +1,6 @@
 # Cours de Docker ESEO
 
-$~~~~~~~~~~~$
+
 ## Démarrage
 
 Pour démarrager l'application, ouvrez une invite de commande à l'endroit où vous avez placé l'archive et exécutez la commande :
@@ -31,13 +31,12 @@ c37332ce119c   phpmyadmin/phpmyadmin:latest   "/docker-entrypoint.…"   About a
 - Le site de phpmyadmin est accessible à l'IP : `http://localhost:8080`.
 - La base de donnée tourne sur l'IP : `http://localhost:3306`.
 
-$~~~~~~~~~~~$
 ## Objectifs
 Les objectifs sont les suivants :
 - La réalisation d'un conteneur d'un serveur web apache2 avec php.
 - La réalisation d'un conteneur avec une base de données.
 
-$~~~~~~~~~~~$
+
 ## Réalisation
 En pratique 3 conteneurs on été réalisés :
 - Un conteneur avec un site web apache2 avec php.
@@ -45,7 +44,6 @@ En pratique 3 conteneurs on été réalisés :
 - Un conteneur avec phpmyadmin.
 
 
-$~~~~~~~~~~~$
 ## Validation
 Pour le conteneur apache2 :
 - Le serveur web tourne, il est possible de s'y connecter.
