@@ -43,6 +43,7 @@ services:
       networks:
       - networkName
 
+# Network configuration for phpmyadmin and MariaDB
 networks:
   networkName:
     name: networkName
